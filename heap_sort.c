@@ -1,5 +1,4 @@
-#include <iostream>
-using namespace std;
+#include <stdio.h>
 
 void heapify(int arr[], int n, int i) {
     int largest = i;

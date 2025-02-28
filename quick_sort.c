@@ -1,6 +1,11 @@
-#include <iostream>
-#include <cstdlib>  
-using namespace std;
+#include <stdio.h>
+#include <stdlib.h>
+
+void swap(int* a, int* b) {
+    int tmp = *a;
+    *a = *b;
+    *b = tmp;
+}
 
 int partitionFirst(int arr[], int low, int high) {
     int pivot = arr[low];
@@ -9,23 +14,23 @@ int partitionFirst(int arr[], int low, int high) {
     while(i <= j) {
         while(i <= high && arr[i] <= pivot) i++;
         while(arr[j] > pivot) j--;
-        if(i < j) swap(arr[i], arr[j]);
+        if(i < j) swap(&arr[i], &arr[j]);
     }
-    swap(arr[low], arr[j]);
+    swap(&arr[low], &arr[j]);
     return j;
 }
 
 int partitionRandom(int arr[], int low, int high) {
     int randomIndex = low + rand() % (high - low + 1);
-    swap(arr[low], arr[randomIndex]);
+    swap(&arr[low], &arr[randomIndex]);
     return partitionFirst(arr, low, high);
 }
 
 int partitionMedian(int arr[], int low, int high) {
     int mid = low + (high - low) / 2;
-    if((arr[low] > arr[mid]) != (arr[low] > arr[high])) swap(arr[low], arr[low]);
-    else if((arr[mid] > arr[low]) != (arr[mid] > arr[high])) swap(arr[low], arr[mid]);
-    else swap(arr[low], arr[high]);
+    if((arr[low] > arr[mid]) != (arr[low] > arr[high])) swap(&arr[low], &arr[low]);
+    else if((arr[mid] > arr[low]) != (arr[mid] > arr[high])) swap(&arr[low], &arr[mid]);
+    else swap(&arr[low], &arr[high]);
     return partitionFirst(arr, low, high);
 }
 

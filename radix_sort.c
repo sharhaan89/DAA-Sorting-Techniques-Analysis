@@ -1,5 +1,4 @@
-#include <iostream>
-using namespace std;
+#include <stdio.h>
 
 int getMax(int arr[], int n) {
     int maxVal = arr[0];
