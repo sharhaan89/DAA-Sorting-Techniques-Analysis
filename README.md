@@ -5,22 +5,26 @@ Processor: 13th Gen Intel(R) Core(TM) i5-1335U   1.30 GHz
 RAM: 16 GB
 Operating System: Windows 10 
 Compiler: GCC 
+
 2. Timing Mechanism:
 
 We used a high-resolution timer for all experiments.
 On POSIX systems, the clock_gettime() function with the CLOCK_MONOTONIC flag was used.
 On Windows systems, QueryPerformanceCounter() was used.
 The measured time is reported in seconds (with microsecond precision).
+
 3. Repetition of Experiments:
 
 To obtain stable measurements and account for system load variations, each experiment (i.e., sorting a given input) was repeated 10 times.
 The reported time for each test case is the average execution time over these 10 runs.
 A similar averaging was performed for counting comparisons (where applicable).
+
 4. Reported Times:
 
 For each input size and each algorithm, we report the average execution time in seconds.
 For comparison-based algorithms, we also report the average number of comparisons.
 For non-comparison-based sorts (like Radix Sort), only execution time is reported.
+
 5. Input Data Selection:
 
 Test Case Sizes:
