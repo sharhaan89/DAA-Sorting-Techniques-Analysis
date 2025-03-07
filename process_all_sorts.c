@@ -1,4 +1,4 @@
-/* process_file.c - Improved version with high-resolution timing and repeated experiments */
+/* process_all_sorts.c */
 #ifdef _WIN32
 #include <windows.h>
 #else
@@ -8,6 +8,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#define NUM_RUNS 10
 
 // High-resolution timer function:
 #ifdef _WIN32
@@ -25,26 +27,23 @@ double get_time() {
 }
 #endif
 
-// Global comparisons counter
+// Global comparisons counter (for comparison-based sorts)
 long long comparisons = 0;
 
-// Function prototypes for sorting algorithms:
+/* Sorting algorithm prototypes */
 void mergeSort(int arr[], int l, int r);
 void bubbleSort(int arr[], int n);
 void insertionSort(int arr[], int n);
-void quickSortFirst(int arr[], int low, int high);
-void quickSortRandom(int arr[], int low, int high);
 void quickSortMedian(int arr[], int low, int high);
 void heapSort(int arr[], int n);
 void radixSort(int arr[], int n);
 
-// --- Merge Sort Wrapper ---
-// This wrapper allows us to use mergeSort (which requires l and r) in our uniform function pointer interface.
+/* --- MergeSort --- */
+// Wrapper so that our function pointer has the signature void f(int[], int)
 void mergeSortWrapper(int arr[], int n) {
     mergeSort(arr, 0, n - 1);
 }
 
-// --- Merge Sort Implementation ---
 void merge(int arr[], int l, int m, int r) {
     int n1 = m - l + 1, n2 = r - m;
     int *L = (int*)malloc(n1 * sizeof(int));
@@ -76,96 +75,38 @@ void mergeSort(int arr[], int l, int r) {
     }
 }
 
-// --- Bubble Sort ---
+/* --- Bubble Sort --- */
 void bubbleSort(int arr[], int n) {
     for (int i = 0; i < n - 1; i++) {
         for (int j = 0; j < n - i - 1; j++) {
             comparisons++;
-            if (arr[j] > arr[j + 1]) {
+            if (arr[j] > arr[j+1]) {
                 int temp = arr[j];
-                arr[j] = arr[j + 1];
-                arr[j + 1] = temp;
+                arr[j] = arr[j+1];
+                arr[j+1] = temp;
             }
         }
     }
 }
 
-// --- Insertion Sort ---
+/* --- Insertion Sort --- */
 void insertionSort(int arr[], int n) {
     for (int i = 1; i < n; i++) {
         int key = arr[i], j = i - 1;
         while (j >= 0) {
             comparisons++;
             if (arr[j] > key) {
-                arr[j + 1] = arr[j];
+                arr[j+1] = arr[j];
                 j--;
             } else {
                 break;
             }
         }
-        arr[j + 1] = key;
+        arr[j+1] = key;
     }
 }
 
-// --- Quick Sort with First Element as Pivot ---
-int partitionFirst(int arr[], int low, int high) {
-    int pivot = arr[low];
-    int i = low + 1, j = high;
-    while (1) {
-        while (i <= high && (comparisons++, arr[i] <= pivot)) i++;
-        while (j >= low && (comparisons++, arr[j] > pivot)) j--;
-        if (i < j) {
-            int temp = arr[i];
-            arr[i] = arr[j];
-            arr[j] = temp;
-        } else break;
-    }
-    int temp = arr[low];
-    arr[low] = arr[j];
-    arr[j] = temp;
-    return j;
-}
-
-void quickSortFirst(int arr[], int low, int high) {
-    if (low < high) {
-        int p = partitionFirst(arr, low, high);
-        quickSortFirst(arr, low, p - 1);
-        quickSortFirst(arr, p + 1, high);
-    }
-}
-
-// --- Quick Sort with Random Pivot ---
-int partitionRandom(int arr[], int low, int high) {
-    int randomIndex = low + rand() % (high - low + 1);
-    int temp = arr[low];
-    arr[low] = arr[randomIndex];
-    arr[randomIndex] = temp;
-    int pivot = arr[low];
-    int i = low + 1, j = high;
-    while (1) {
-        while (i <= high && (comparisons++, arr[i] <= pivot)) i++;
-        while (j >= low && (comparisons++, arr[j] > pivot)) j--;
-        if (i < j) {
-            temp = arr[i];
-            arr[i] = arr[j];
-            arr[j] = temp;
-        } else break;
-    }
-    temp = arr[low];
-    arr[low] = arr[j];
-    arr[j] = temp;
-    return j;
-}
-
-void quickSortRandom(int arr[], int low, int high) {
-    if (low < high) {
-        int p = partitionRandom(arr, low, high);
-        quickSortRandom(arr, low, p - 1);
-        quickSortRandom(arr, p + 1, high);
-    }
-}
-
-// --- Quick Sort with Median-of-Three Pivot ---
+/* --- QuickSort with Median-of-Three Pivot --- */
 int medianOfThree(int arr[], int low, int high) {
     int mid = low + (high - low) / 2;
     if (arr[low] > arr[mid]) { comparisons++; int temp = arr[low]; arr[low] = arr[mid]; arr[mid] = temp; }
@@ -204,20 +145,13 @@ void quickSortMedian(int arr[], int low, int high) {
     }
 }
 
-// Wrapper functions for Quick Sort variants:
-void quickSortFirstWrapper(int arr[], int n) {
-    quickSortFirst(arr, 0, n - 1);
-}
-void quickSortRandomWrapper(int arr[], int n) {
-    quickSortRandom(arr, 0, n - 1);
-}
 void quickSortMedianWrapper(int arr[], int n) {
     quickSortMedian(arr, 0, n - 1);
 }
 
-// --- Heap Sort ---
+/* --- Heap Sort --- */
 void heapify(int arr[], int n, int i) {
-    int largest = i, left = 2 * i + 1, right = 2 * i + 2;
+    int largest = i, left = 2*i + 1, right = 2*i + 2;
     if (left < n) {
         comparisons++;
         if (arr[left] > arr[largest])
@@ -237,7 +171,7 @@ void heapify(int arr[], int n, int i) {
 }
 
 void heapSort(int arr[], int n) {
-    for (int i = n / 2 - 1; i >= 0; i--)
+    for (int i = n/2 - 1; i >= 0; i--)
         heapify(arr, n, i);
     for (int i = n - 1; i > 0; i--) {
         int temp = arr[0];
@@ -247,7 +181,7 @@ void heapSort(int arr[], int n) {
     }
 }
 
-// --- Radix Sort (non-comparison-based) ---
+/* --- Radix Sort (non-comparison based) --- */
 int getMax(int arr[], int n) {
     int mx = arr[0];
     for (int i = 1; i < n; i++)
@@ -262,8 +196,8 @@ void countSort(int arr[], int n, int exp) {
     for (int i = 0; i < n; i++)
         count[(arr[i] / exp) % 10]++;
     for (int i = 1; i < 10; i++)
-        count[i] += count[i - 1];
-    for (int i = n - 1; i >= 0; i--) {
+        count[i] += count[i-1];
+    for (int i = n-1; i >= 0; i--) {
         output[count[(arr[i] / exp) % 10] - 1] = arr[i];
         count[(arr[i] / exp) % 10]--;
     }
@@ -274,24 +208,22 @@ void countSort(int arr[], int n, int exp) {
 
 void radixSort(int arr[], int n) {
     int m = getMax(arr, n);
-    for (int exp = 1; m / exp > 0; exp *= 10)
+    for (int exp = 1; m/exp > 0; exp *= 10)
         countSort(arr, n, exp);
 }
 
-// --- Utility: Duplicate an array ---
+/* --- Utility: Duplicate an Array --- */
 int* duplicateArray(int arr[], int n) {
     int *copy = (int*)malloc(n * sizeof(int));
     memcpy(copy, arr, n * sizeof(int));
     return copy;
 }
 
-// Function pointer type for sorting functions:
+/* Function pointer type for sorts that use signature: void f(int[], int) */
 typedef void (*SortFunc)(int[], int);
 
-#define NUM_RUNS 10
-
-// Runs the given sort function NUM_RUNS times and averages the results.
-void runSortAlgorithmRepeated(int arr[], int n, SortFunc sortFunc, const char* algoName, FILE *outputCSV) {
+/* Run a sort repeatedly and average the results (for comparison-based sorts) */
+void runSortAlgorithmRepeated(int arr[], int n, SortFunc sortFunc, const char *algoName, const char *caseStr, FILE *outputCSV) {
     double total_time = 0.0;
     long long total_comparisons = 0;
     for (int run = 0; run < NUM_RUNS; run++) {
@@ -306,11 +238,11 @@ void runSortAlgorithmRepeated(int arr[], int n, SortFunc sortFunc, const char* a
     }
     double avg_time = total_time / NUM_RUNS;
     long long avg_comparisons = total_comparisons / NUM_RUNS;
-    fprintf(outputCSV, "%d,%s,%.6f,%lld\n", n, algoName, avg_time, avg_comparisons);
+    fprintf(outputCSV, "%d,%s,%.6f,%lld,%s\n", n, algoName, avg_time, avg_comparisons, caseStr);
 }
 
-// Special routine for RadixSort (non-comparison-based):
-void runRadixSortRepeated(int arr[], int n, FILE *outputCSV) {
+/* Run RadixSort repeatedly (non-comparison-based) */
+void runRadixSortRepeated(int arr[], int n, const char *caseStr, FILE *outputCSV) {
     double total_time = 0.0;
     for (int run = 0; run < NUM_RUNS; run++) {
         int *copy = duplicateArray(arr, n);
@@ -321,15 +253,21 @@ void runRadixSortRepeated(int arr[], int n, FILE *outputCSV) {
         free(copy);
     }
     double avg_time = total_time / NUM_RUNS;
-    fprintf(outputCSV, "%d,RadixSort,%.6f,NA\n", n, avg_time);
+    fprintf(outputCSV, "%d,RadixSort,%.6f,NA,%s\n", n, avg_time, caseStr);
 }
 
+/* Main program:
+   Expects two command-line arguments:
+   1. Input file name (which should follow the format: first line = n, second line = n integers)
+   2. Case type: "best", "worst", or "average"
+*/
 int main(int argc, char *argv[]) {
-    // Use the input file provided via command line (default: "random_input.txt")
     const char *inputFilename = "random_input.txt";
-    if (argc >= 2) {
+    const char *caseType = "average";
+    if (argc >= 2)
         inputFilename = argv[1];
-    }
+    if (argc >= 3)
+        caseType = argv[2];
     
     FILE *input = fopen(inputFilename, "r");
     if (!input) {
@@ -337,14 +275,14 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     
-    FILE *outputCSV = fopen("output.csv", "w");
+    FILE *outputCSV = fopen("output_all_sorts.csv", "w");
     if (!outputCSV) {
         printf("Error opening output file!\n");
         fclose(input);
         return 1;
     }
-    // Write CSV header
-    fprintf(outputCSV, "InputSize,Algorithm,Time,Comparisons\n");
+    // CSV header: InputSize, Algorithm, Time, Comparisons, Case
+    fprintf(outputCSV, "InputSize,Algorithm,Time,Comparisons,Case\n");
     
     int n;
     while (fscanf(input, "%d", &n) != EOF) {
@@ -357,21 +295,19 @@ int main(int argc, char *argv[]) {
             fscanf(input, "%d", &arr[i]);
         }
         
-        // Run each sorting algorithm and log averaged results:
-        runSortAlgorithmRepeated(arr, n, mergeSortWrapper, "MergeSort", outputCSV);
-        runSortAlgorithmRepeated(arr, n, bubbleSort, "BubbleSort", outputCSV);
-        runSortAlgorithmRepeated(arr, n, insertionSort, "InsertionSort", outputCSV);
-        runSortAlgorithmRepeated(arr, n, quickSortFirstWrapper, "QuickSortFirst", outputCSV);
-        runSortAlgorithmRepeated(arr, n, quickSortRandomWrapper, "QuickSortRandom", outputCSV);
-        runSortAlgorithmRepeated(arr, n, quickSortMedianWrapper, "QuickSortMedian", outputCSV);
-        runSortAlgorithmRepeated(arr, n, heapSort, "HeapSort", outputCSV);
-        runRadixSortRepeated(arr, n, outputCSV);
+        // Run each sorting algorithm and log the averaged results:
+        runSortAlgorithmRepeated(arr, n, mergeSortWrapper, "MergeSort", caseType, outputCSV);
+        runSortAlgorithmRepeated(arr, n, bubbleSort, "BubbleSort", caseType, outputCSV);
+        runSortAlgorithmRepeated(arr, n, insertionSort, "InsertionSort", caseType, outputCSV);
+        runSortAlgorithmRepeated(arr, n, quickSortMedianWrapper, "QuickSortMedian", caseType, outputCSV);
+        runSortAlgorithmRepeated(arr, n, heapSort, "HeapSort", caseType, outputCSV);
+        runRadixSortRepeated(arr, n, caseType, outputCSV);
         
         free(arr);
     }
     
     fclose(input);
     fclose(outputCSV);
-    printf("Sorting completed. Results saved to output.csv\n");
+    printf("Sorting experiments completed. Results saved to output_all_sorts.csv\n");
     return 0;
 }
