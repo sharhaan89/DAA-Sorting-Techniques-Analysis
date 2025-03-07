@@ -1,0 +1,73 @@
+$$beginning of the file$$
+
+
+1. Input Generation: 
+first compile the "generate_input.c" file
+
+  gcc generate_input.c -o generate_input
+
+this will give us a "genrate_input.exe" file
+
+---Random Input (Average-case)
+  ./generate_input random
+
+---Random Input (best-case)
+  ./generate_input increasing
+
+---Random Input (worst-case)
+  ./generate_input decreasing
+
+this will generate files namely "random_input.txt", "increasing.txt", "decreasing.txt" (if they not exist)
+
+2. Sorting Experiments:
+QuickSort Comparisons Only
+first compile:
+  gcc compare_quick.c -o compare_quick -lm
+this will give us "compare_quick.exe" file now,
+
+for Best-case:
+  ./compare_quick increasing_input.txt best
+for Worst-case:
+  ./compare_quick decreasing_input.txt worst
+for Average-case:
+  ./compare_quick random_input.txt average
+
+the result will be saved in "quick_sort_comparision.csv" 
+
+Six Sorting techniques
+first compile the "process_all_sorts.c" file
+
+  gcc process_all_sorts.c -o process_all_sorts -lm
+
+this will give us process_all_sorts.exe file now,
+
+---Best Case
+  ./process_all_sorts increasing_input.txt best
+
+
+---Average Case
+  ./process_all_sorts random_input.txt average
+
+---Worst Case
+  ./process_all_sorts decreasing_input.txt worst
+
+
+this result will be saved in "output_all_sorts.csv"
+
+
+3. Graphing and Analysis
+
+Prerequisites
+Make sure you have Python installed along with the pandas and matplotlib libraries. You can install them with:
+  pip install pandas matplotlib
+
+
+for QuickSort comparision:-
+  python analyze_quick.py
+
+for all sorts:-
+  python analyze_results.py
+
+
+
+$$end of file$$
