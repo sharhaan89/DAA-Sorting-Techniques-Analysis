@@ -2,8 +2,11 @@ Experimental Setup
 1. Machine Specifications:
 
 Processor: 13th Gen Intel(R) Core(TM) i5-1335U   1.30 GHz
+
 RAM: 16 GB
+
 Operating System: Windows 10 
+
 Compiler: GCC 
 
 2. Timing Mechanism:
